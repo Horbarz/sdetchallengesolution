@@ -1,0 +1,16 @@
+{
+  "name": "playwright-tests",
+  "version": "1.0.0",
+  "description": "Playwright TypeScript tests for automationintesting.online",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:headed": "npx playwright test --headed",
+    "test:report": "npx playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.44.0",
+    "@types/node": "^25.9.1",
+    "dotenv": "^17.4.2",
+    "typescript": "^5.0.0"
+  }
+}

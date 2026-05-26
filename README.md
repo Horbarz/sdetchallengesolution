@@ -1,22 +1,21 @@
-# Playwright Test Suite — automationintesting.online
+# SDET Technical Challenge_Shady Meadows B&B
 
-## Approach
+## Part 1 API Automation (Karate)
+Git clone the repository
+Navigate into the karate_project directory
+From the project directory, run ./mvnw clean test 
+Once the test is complete, an HTML test report is generated in this path: target/karate-reports/karate-summary.html. The report includes a summary of  passed/failed scenarios, step-level details, and request/response payloads for each test.
+Open the report with any browser
+
+
+## Part 2 UI Automation (Playwright)
 
 ### Page Object Model (POM)
-Tests are structured using the Page Object Model pattern. Each page of the application is represented by a class in the `pages/` directory, which encapsulates locators and interaction methods. Test files in `tests/` then call these methods rather than interacting with the DOM directly. This separation keeps tests readable and makes locator changes a single-file fix.
+The tests are structured using the Page Object Model pattern. Each page of the application is represented by a class in the `pages/` directory that contains the locators and web interactions. The Test files are in `tests/` then call the methods in the pages directory rather than interacting with the UI elements directly. 
 
-```
-pages/
-  AdminLoginPage.ts       # login form interactions
-  AdminDashboardPage.ts   # dashboard assertions and navigation
-  HomePage.ts             # public-facing homepage interactions
-tests/
-  admin.spec.ts           # admin auth and dashboard tests
-  homepage.spec.ts        # public homepage sanity tests
-```
 
 ### Credential Management
-Credentials are loaded from a `.env` file at runtime via `dotenv`, keeping them out of source code entirely. A `.env.example` file is committed to the repository as a template; the actual `.env` is gitignored.
+Login credentials are loaded from a `.env` file at runtime via `dotenv`, keeping them out of source code entirely. A `.env.example` file is committed to the repository as a template for anyone testing the code; the actual `.env` is gitignored.
 
 ```
 ADMIN_USERNAME=
@@ -28,76 +27,24 @@ ADMIN_PASSWORD=
 ## Bugs Found
 
 ### 1. Incorrect dashboard URL assertion (`AdminDashboardPage.ts:15`)
-`assertOnDashboard()` asserts the URL matches `/dashboard/inboxes`, but after a successful admin login the application actually redirects to `/admin/rooms`. The assertion passes in the current test run only because the URL pattern is not strictly checked — this would fail against a stricter matcher.
+`assertOnDashboard()` asserts the URL matches `/dashboard/inboxes` which is according to the documentation provided, but after a successful admin login the application actually redirects to `/admin/rooms`.
 
-**Fix:** Update the regex to reflect the actual redirect target:
-```ts
-await expect(this.page).toHaveURL(/\/admin\/rooms/);
-```
-
-### 2. `assertRoomExists` matches text anywhere on the page
-The room-existence check looks for the room type and price as plain text anywhere in the DOM. A price like `100` could match unrelated content (pagination counts, IDs, etc.), producing a false positive.
-
-**Fix:** Scope the assertion to the rooms table row, for example:
-```ts
-const row = this.page.locator('tr', { hasText: roomType });
-await expect(row).toContainText(price);
-```
-
----
 
 ## CI/CD Integration
 
 ### GitHub Actions example
 
-Create `.github/workflows/playwright.yml`:
+Create your github actions yml file `.github/workflows/cicd.yml` (Check the github actions file I created for the CI/CD pipeline)
 
-```yaml
-name: Playwright Tests
+Configure it to run either on push or on pull request
+You can also add a scheduler so that it runs at certain intervals
 
-on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main]
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
-
-      - name: Run tests
-        run: npm test
-        env:
-          ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
-          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
-
-      - name: Upload test report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 7
-```
-
-### Key points
+### Important Point
+Since the credentials are not exposed, it's a best practice to add credentials as secrets in github so that credentials are not exposed to a bad actor.
 
 - **Secrets** — Add `ADMIN_USERNAME` and `ADMIN_PASSWORD` under *Settings → Secrets and variables → Actions* in GitHub. They are injected as environment variables at runtime; no `.env` file is needed in CI.
+
 - **`npm ci` over `npm install`** — Uses the lock file for a reproducible install.
 - **`--with-deps`** — Installs the OS-level browser dependencies required on a headless Ubuntu runner.
 - **`if: always()`** on the report upload — Ensures the HTML report is uploaded even when tests fail, so failures can be investigated.
-- **Retention** — Reports are kept for 7 days by default; adjust `retention-days` to suit your team's needs.
+

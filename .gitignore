@@ -2,3 +2,10 @@
 /playwright-tests/test-results/
 /playwright-tests/playwright-report/
 /playwright-tests/.env
+.DS_Store
+*.jar
+*.iml
+target/
+home/
+.idea/
+.vscode/

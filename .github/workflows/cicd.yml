@@ -49,9 +49,10 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
           cache: maven
+          cache-dependency-path: karate-test/pom.xml
 
       - name: Run Karate tests
-        working-directory: karate-template
+        working-directory: karate-test
         env:
           ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
@@ -62,5 +63,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: karate-report
-          path: karate-template/target/karate-reports/
+          path: karate-test/target/karate-reports/
           retention-days: 5

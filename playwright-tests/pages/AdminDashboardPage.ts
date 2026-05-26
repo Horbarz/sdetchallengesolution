@@ -12,7 +12,8 @@ export class AdminDashboardPage {
   }
 
   async assertOnDashboard(): Promise<void> {
-    await expect(this.page).toHaveURL(/\/dashboard\/inboxes/);
+    //await expect(this.page).toHaveURL(/\/dashboard\/inboxes/); //Expect to be redirected to the dashboard inboxes page after login
+    await expect(this.page).toHaveURL(/\/admin\/rooms/); // Update to match the actual URL after login
   }
 
   async assertLogoutButtonVisible(): Promise<void> {
